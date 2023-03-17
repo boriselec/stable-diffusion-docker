@@ -129,7 +129,9 @@ def stable_diffusion_pipeline(p):
 
 
 def stable_diffusion_inference(p):
-    prefix = p.prompt.replace(" ", "_")[:170]
+    for char in [" ", "/"]:
+        prefix = p.prompt.replace(char, "_")
+    prefix = prefix[:170]
     img_paths = []
     for j in range(p.iters):
         result = p.pipeline(**remove_unused_args(p))
