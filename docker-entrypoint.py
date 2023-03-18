@@ -129,7 +129,7 @@ def stable_diffusion_pipeline(p):
 
 
 def stable_diffusion_inference(p):
-    prefix = p.prompt.replace(" ", "_")[:170]
+    prefix = p.prompt.replace[:170]
     img_paths = []
     for j in range(p.iters):
         result = p.pipeline(**remove_unused_args(p))
@@ -137,12 +137,22 @@ def stable_diffusion_inference(p):
         for i, img in enumerate(result.images):
             idx = j * p.samples + i + 1
             out = f"{prefix}__steps_{p.steps}__scale_{p.scale:.2f}__seed_{p.seed}__n_{idx}.png"
-            out_path = os.path.join("output", out)
+            out_path = normalize_filename(os.path.join("output", out))
             img.save(out_path)
             img_paths.append(out_path)
 
     print("completed pipeline:", iso_date_time(), flush=True)
     return img_paths
+
+def normalize_filename(fn):
+    valid_chars = "-_.() "
+    out = ""
+    for c in fn:
+      if str.isalpha(c) or str.isdigit(c) or (c in valid_chars):
+        out += c
+      else:
+        out += "_"
+    return out
 
 
 def main():
