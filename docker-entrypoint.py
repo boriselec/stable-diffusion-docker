@@ -129,7 +129,7 @@ def stable_diffusion_pipeline(p):
 
 
 def stable_diffusion_inference(p):
-    prefix = sanitize_filename(p.prompt[:170])
+    prefix = sanitize_filename(p.prompt)
     img_paths = []
     for j in range(p.iters):
         result = p.pipeline(**remove_unused_args(p))
@@ -144,7 +144,8 @@ def stable_diffusion_inference(p):
     print("completed pipeline:", iso_date_time(), flush=True)
     return img_paths
 
-def sanitize_filename(fn):
+def sanitize_filename(fn, encoding='utf-8'):
+    fn = fn.encode(encoding)[:170].decode(encoding, 'ignore')
     valid_chars = "-_.()"
     out = ""
     for c in fn:
