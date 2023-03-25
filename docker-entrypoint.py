@@ -27,21 +27,21 @@ def load_image(path):
     return image
 
 
-def remove_unused_args(p):
-    params = inspect.signature(p.pipeline).parameters.keys()
+def remove_unused_args(pipeline, args):
+    params = inspect.signature(pipeline).parameters.keys()
     args = {
-        "prompt": p.prompt,
-        "negative_prompt": p.negative_prompt,
-        "image": p.image,
-        "mask_image": p.mask,
-        "height": p.height,
-        "width": p.width,
-        "num_images_per_prompt": p.samples,
-        "num_inference_steps": p.steps,
-        "guidance_scale": p.scale,
-        "image_guidance_scale": p.image_scale,
-        "strength": p.strength,
-        "generator": p.generator,
+        "prompt": args.prompt,
+        "negative_prompt": args.negative_prompt,
+        "image": args.image,
+        "mask_image": args.mask,
+        "height": args.height,
+        "width": args.width,
+        "num_images_per_prompt": args.samples,
+        "num_inference_steps": args.steps,
+        "guidance_scale": args.scale,
+        "image_guidance_scale": args.image_scale,
+        "strength": args.strength,
+        "generator": args.generator,
     }
     return {p: args[p] for p in params if p in args}
 
@@ -125,21 +125,20 @@ def stable_diffusion_pipeline(p):
 
     print("loaded models after:", iso_date_time(), flush=True)
 
-    return p
+    return p.pipeline, p.generator
 
 
-def stable_diffusion_inference(p):
-    prefix = sanitize_filename(p.prompt)
+def stable_diffusion_inference(pipeline, args):
+    prefix = sanitize_filename(args.prompt)
     img_paths = []
-    for j in range(p.iters):
-        result = p.pipeline(**remove_unused_args(p))
+    result = pipeline(**remove_unused_args(pipeline, args))
 
-        for i, img in enumerate(result.images):
-            idx = j * p.samples + i + 1
-            out = f"{prefix}__steps_{p.steps}__scale_{p.scale:.2f}__seed_{p.seed}__n_{idx}.png"
-            out_path = os.path.join("output", out)
-            img.save(out_path)
-            img_paths.append(out_path)
+    for i, img in enumerate(result.images):
+        idx = i + 1
+        out = f"{prefix}__n_{idx}.png"
+        out_path = os.path.join("output", out)
+        img.save(out_path)
+        img_paths.append(out_path)
 
     print("completed pipeline:", iso_date_time(), flush=True)
     return img_paths
