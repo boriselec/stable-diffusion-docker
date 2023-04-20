@@ -149,15 +149,19 @@ def stable_diffusion_inference(p):
         .encode("utf-8")[:170]
         .decode("utf-8", "ignore")
     )
+    img_paths = []
     for j in range(p.iters):
         result = p.pipeline(**remove_unused_args(p))
 
         for i, img in enumerate(result.images):
             idx = j * p.samples + i + 1
             out = f"{prefix}__steps_{p.steps}__scale_{p.scale:.2f}__seed_{p.seed}__n_{idx}.png"
-            img.save(os.path.join("output", out))
+            out_path = os.path.join("output", out)
+            img.save(out_path)
+            img_paths.append(out_path)
 
     print("completed pipeline:", iso_date_time(), flush=True)
+    return img_paths
 
 
 def parse_args():
